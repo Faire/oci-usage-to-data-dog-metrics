@@ -219,6 +219,9 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
         node_pool_tags = [i.tags[0] for i in request_summarized_usages.data.items]
         logging.getLogger().debug(f"Found following pool tags: {node_pool_tags}")
 
+        # This environment variable is populated by Terraform
+        oci_cluster_name = os.getenv('OCI_CLUSTER_NAME', '')
+
         # Since we can't filter by both skuName and tag at the same time, get cost data for each pool tag separately
         node_pool_tags.append({})  # Add empty tag to get cost data for cost metrics without pool tag
         for pool_tag in node_pool_tags:
@@ -283,6 +286,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "displayName:" + sku_name,
                                 "region:" + region,
                                 "tenancy:" + tenancy,
+                                "cluster:" + oci_cluster_name,
                                 "pool:" + pool
                             ]
                         }
@@ -310,6 +314,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "displayName:" + sku_name,
                                 "region:" + region,
                                 "tenancy:" + tenancy,
+                                "cluster:" + oci_cluster_name,
                                 "pool:" + pool
                             ]
                         }
