@@ -195,6 +195,15 @@ def get_tag_name(sku_name):
     tag_name = re.sub('[^A-Za-z0-9]+', '', sku_name)
     return tag_name
 
+def parse_from_pool_name(pool_name):
+    parsed = []
+    split = pool_name.split("_")
+    if len(split) >= 4:
+        parsed["cluster"] = split[0]
+        parsed["preemptible"] = split[1] == "preemptible"
+        parsed["workload_type"] = "common" if split[2] == "common" else "worker"
+        parsed["instance_family"] = split[3]
+    return parsed
 
 # Usage Daily by Product to Data Dog API Format
 def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_ended):
@@ -218,9 +227,6 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
 
         node_pool_tags = [i.tags[0] for i in request_summarized_usages.data.items]
         logging.getLogger().debug(f"Found following pool tags: {node_pool_tags}")
-
-        # This environment variable is populated by Terraform
-        oci_cluster_name = os.getenv('OCI_CLUSTER_NAME', '')
 
         # Since we can't filter by both skuName and tag at the same time, get cost data for each pool tag separately
         node_pool_tags.append({})  # Add empty tag to get cost data for cost metrics without pool tag
@@ -266,6 +272,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                 region = item.region if item.region else "None"
                 unit = item.unit if item.unit else "None"
                 pool = pool if pool else "Others"
+                parsed = parse_from_pool_name(pool)
                 computed_amount = item.computed_amount if item.computed_amount else 0
 
                 data_dog_metric_data.append({
@@ -286,7 +293,10 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "displayName:" + sku_name,
                                 "region:" + region,
                                 "tenancy:" + tenancy,
-                                "cluster:" + oci_cluster_name,
+                                "cluster:" + parsed.get("cluster", ""),
+                                "preemptible:" + parsed.get("preemptible", False),
+                                "workload_type:" + parsed.get("workload_type", ""),
+                                "instance_family:" + parsed.get("instance_family", ""),
                                 "pool:" + pool
                             ]
                         }
@@ -314,7 +324,10 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "displayName:" + sku_name,
                                 "region:" + region,
                                 "tenancy:" + tenancy,
-                                "cluster:" + oci_cluster_name,
+                                "cluster:" + parsed.get("cluster", ""),
+                                "preemptible:" + parsed.get("preemptible", False),
+                                "workload_type:" + parsed.get("workload_type", ""),
+                                "instance_family:" + parsed.get("instance_family", ""),
                                 "pool:" + pool
                             ]
                         }
