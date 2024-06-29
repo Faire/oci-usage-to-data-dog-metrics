@@ -84,7 +84,7 @@ today_api = date.today()
 yesterday_api = today_api - timedelta(days=1)
 today = str(today_api)
 yesterday = str(yesterday_api)
-
+metric_version = "2.0"
 
 ##########################################################################
 # custom argparse *date* type for user dates
@@ -196,7 +196,7 @@ def get_tag_name(sku_name):
     return tag_name
 
 def parse_from_pool_name(pool_name):
-    parsed = []
+    parsed = {}
     split = pool_name.split("_")
     if len(split) >= 4:
         parsed["cluster"] = split[0]
@@ -297,6 +297,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "preemptible:" + parsed.get("preemptible", False),
                                 "workload_type:" + parsed.get("workload_type", ""),
                                 "instance_family:" + parsed.get("instance_family", ""),
+                                "metric_version:" + metric_version,
                                 "pool:" + pool
                             ]
                         }
@@ -328,6 +329,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "preemptible:" + parsed.get("preemptible", False),
                                 "workload_type:" + parsed.get("workload_type", ""),
                                 "instance_family:" + parsed.get("instance_family", ""),
+                                "metric_version:" + metric_version,
                                 "pool:" + pool
                             ]
                         }
