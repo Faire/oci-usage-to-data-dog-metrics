@@ -200,7 +200,7 @@ def parse_from_pool_name(pool_name):
     split = pool_name.split("_")
     if len(split) >= 4:
         parsed["cluster"] = split[0]
-        parsed["preemptible"] = split[1] == "preemptible"
+        parsed["preemptible"] = "true" if split[1] == "preemptible" else "false"
         parsed["workload_type"] = "common" if split[2] == "common" else "worker"
         parsed["instance_family"] = split[3]
     return parsed
@@ -294,7 +294,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "region:" + region,
                                 "tenancy:" + tenancy,
                                 "cluster:" + parsed.get("cluster", ""),
-                                "preemptible:" + parsed.get("preemptible", False),
+                                "preemptible:" + parsed.get("preemptible", "false"),
                                 "workload_type:" + parsed.get("workload_type", ""),
                                 "instance_family:" + parsed.get("instance_family", ""),
                                 "metric_version:" + metric_version,
@@ -326,7 +326,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "region:" + region,
                                 "tenancy:" + tenancy,
                                 "cluster:" + parsed.get("cluster", ""),
-                                "preemptible:" + parsed.get("preemptible", False),
+                                "preemptible:" + parsed.get("preemptible", "false"),
                                 "workload_type:" + parsed.get("workload_type", ""),
                                 "instance_family:" + parsed.get("instance_family", ""),
                                 "metric_version:" + metric_version,
