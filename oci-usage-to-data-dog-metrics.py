@@ -228,19 +228,29 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
         node_pool_tags = [i.tags[0] for i in request_summarized_usages.data.items]
         logging.getLogger().debug(f"Found following pool tags: {node_pool_tags}")
 
-        # Since we can't filter by both skuName and tag at the same time, get cost data for each pool tag separately
-        node_pool_tags.append({})  # Add empty tag to get cost data for cost metrics without pool tag
+        if not node_pool_tags:
+            # This is for fairedata tenancy which doesn't use node pool tags
+            node_pool_tags = [None]
+        else:
+            # Since we can't filter by both skuName and tag at the same time, get cost data for each pool tag separately
+            node_pool_tags.append({})  # Add empty tag to get cost data for cost metrics without pool tag
+
         for pool_tag in node_pool_tags:
-            pool = pool_tag.value if pool_tag else None
+            if pool_tag is None:
+                filter = None
+                pool = None
+            else:
+                pool = pool_tag.value if pool_tag else None
+                filter = oci.usage_api.models.Filter(
+                    operator="AND" if pool else "NOT",
+                    tags=[oci.usage_api.models.Tag(namespace='oke', key='pool', value=pool)] if pool else [oci.usage_api.models.Tag(namespace='oke', key='pool')]
+                )
 
             request_summarized_usages_details = oci.usage_api.models.RequestSummarizedUsagesDetails(
                 tenant_id=tenant_id,
                 granularity='DAILY',
                 query_type='COST',
-                filter=oci.usage_api.models.Filter(
-                    operator="AND" if pool else "NOT",
-                    tags=[oci.usage_api.models.Tag(namespace='oke', key='pool', value=pool)] if pool else [oci.usage_api.models.Tag(namespace='oke', key='pool')]
-                ),
+                filter=filter,
                 group_by=['skuPartNumber', 'skuName', 'region', 'unit'],
                 time_usage_started=time_usage_started.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 time_usage_ended=time_usage_ended.strftime('%Y-%m-%dT%H:%M:%SZ')
