@@ -362,7 +362,6 @@ def upload_to_data_dog(metrics):
     logging.getLogger().info("Uploading to Data Dog")
     api_endpoint = os.getenv('DATADOG_METRICS_API_ENDPOINT', 'https://api.datadoghq.com/api/v2/series')
     api_key = os.getenv('DATADOG_API_KEY', 'not-configured')
-    app_key = os.getenv('DATADOG_APP_KEY', 'not-configured')
     is_forwarding = eval(os.getenv('FORWARD_TO_DATADOG', "False"))
 
     if is_forwarding is False:
@@ -383,7 +382,7 @@ def upload_to_data_dog(metrics):
 
         print("Exporting usage and cost metrics to DataDog")
         for series in metrics:
-            api_headers = {'Content-type': 'application/json', 'DD-API-KEY': api_key, 'DD-APPLICATION-KEY': app_key}
+            api_headers = {'Content-type': 'application/json', 'DD-API-KEY': api_key}
             print(series)
             response = session.post(api_endpoint, data=json.dumps(series), headers=api_headers)
             print(response)
