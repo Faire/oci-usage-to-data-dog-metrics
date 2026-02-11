@@ -337,6 +337,7 @@ def usage_by_product(usage_client, tenant_id, time_usage_started, time_usage_end
                                 "region:" + region,
                                 "tenancy:" + tenancy,
                                 "cluster:" + parsed.get("cluster", ""),
+                                "cluster_name:" + parsed.get("cluster", ""),
                                 "preemptible:" + parsed.get("preemptible", "false"),
                                 "workload_type:" + parsed.get("workload_type", ""),
                                 "instance_family:" + parsed.get("instance_family", ""),
